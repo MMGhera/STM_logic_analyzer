@@ -60,12 +60,18 @@ impl SumpParser{
         0x02, b'0', b'.', b'1', 0x00,
         0x20, 0x05, 0xF5, 0xE1, 0x00,  //100MHz
         0x21, 0x00, 0x01, 0x00, 0x00, //64kb
-        0x23, 0x10,
+        0x22, 0x00, 0x00, 0x00, 0x00,
+        0x23, 0x00, 0x00, 0x00, 0x10,
+        0x24, 0x00, 0x00, 0x00, 0x02,
         0x00];
         class.write_packet(METADATA).await;
     }
 
     pub async fn process_byte<D: Driver<'static>>(&mut self, byte: u8, class: &mut CdcAcmClass<'static, D>) -> bool {
+        if byte == CMD_RESET{
+            self.reset();
+            return false;
+        }
         if self.cmd_idx == 0{
             match byte {
                 CMD_RESET => self.reset(),
@@ -74,10 +80,14 @@ impl SumpParser{
                 },
                 CMD_METADATA => self.send_metadata(class).await,
                 CMD_RUN => return true,
-                CMD_SET_DIV | CMD_SET_READ_COUNT | CMD_SET_FLAGS => {
+                // CMD_SET_DIV | CMD_SET_READ_COUNT | CMD_SET_FLAGS => {
+                //     self.cmd_buffer[0] = byte;
+                //     self.cmd_idx = 1;
+                // },
+                0x80..=0xFF => {
                     self.cmd_buffer[0] = byte;
                     self.cmd_idx = 1;
-                },
+                }
                 _ => {},
             }
         }
