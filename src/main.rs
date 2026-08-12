@@ -3,9 +3,11 @@
 #![no_main]
 
 mod sump;
+mod capture;
 
 use core::char::decode_utf16;
 use sump::SumpParser;
+use capture::init_gpioe;
 use defmt::info;
 use embassy_executor::Spawner;
 use embassy_stm32::{bind_interrupts, Config, peripherals, usb};
@@ -59,6 +61,8 @@ async fn main(_spawner: Spawner) {
     info!("2. Config set, calling embassy_stm32::init...");
     let p = embassy_stm32::init(config);
     info!("3. embassy_stm32::init finished successfully!");
+
+    capture::init_gpioe();
 
     //
     embassy_stm32::pac::PWR.csr2().modify(|w|{
