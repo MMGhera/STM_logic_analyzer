@@ -5,9 +5,11 @@
 mod sump;
 mod capture;
 
-use core::char::decode_utf16;
+use defmt::export::char;
+//use core::char::decode_utf16;
 use sump::SumpParser;
 use capture::init_gpioe;
+use capture::CaptureEngine;
 use defmt::info;
 use embassy_executor::Spawner;
 use embassy_stm32::{bind_interrupts, Config, peripherals, usb};
@@ -113,6 +115,8 @@ async fn main(_spawner: Spawner) {
 
         let mut parser = SumpParser::new();
 
+        let mut capture_engine = CaptureEngine::new();
+
         loop{
             class.wait_connection().await;
             info!("Connected");
@@ -123,13 +127,16 @@ async fn main(_spawner: Spawner) {
                         info!("Received {} bytes", n);
                         for &byte in &buf[..n]{
                             if parser.process_byte(byte, &mut class).await{
-                                let mut dummy_sample = [0u8; 64];
-                                for i in (0..dummy_sample.len()).step_by(2){
-                                    let pattern = if (i/2) % 2 == 0 {0xAA} else {0x55};
-                                    dummy_sample[i]=pattern;
-                                    dummy_sample[i+1]=pattern;
+                                let samples = capture_engine.run_capture(
+                                    parser.config.read_count,
+                                    parser.config.divider,
+                                ).await;
+
+                                let byte_slice = capture::cast_u16_to_u8_slice(samples);
+
+                                for chunk in byte_slice.chunks(64) {
+                                    let _ = class.write_packet(chunk).await;
                                 }
-                                let _ = class.write_packet(&dummy_sample).await;
                             }
                         }
                     }
