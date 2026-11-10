@@ -1,4 +1,4 @@
-# logic_analyzer_rust
+# STM_logic_analyzer
 
 A 16-channel logic analyzer for the **STM32H7S3L8**, written in embedded Rust with [Embassy](https://embassy.dev). It uses the SUMP/Openbench Logic Sniffer protocol over USB High-Speed CDC, so it works with **PulseView** and **sigrok-cli**.
 
