@@ -60,19 +60,15 @@ impl SumpParser{
         const METADATA: &[u8] = &[0x01, b'S', b'T', b'M', b'3', b'2', b'H', b'7', b'S', 0x00,
         0x02, b'0', b'.', b'1', 0x00,
         0x20, 0x00, 0x00, 0x00, 0x10,  //16 probes
-        0x21, 0x00, 0x01, 0x00, 0x00, //64kb
+        0x21, 0x00, 0x00, 0x80, 0x00, //32kb
         0x22, 0x00, 0x00, 0x00, 0x00,
-        0x23, 0x05, 0xF5, 0xE1, 0x00, //100MHz
+        0x23, 0x01, 0x31, 0x2D, 0x00, //20MHz
         0x24, 0x00, 0x00, 0x00, 0x02,
         0x00];
         class.write_packet(METADATA).await;
     }
 
     pub async fn process_byte<D: Driver<'static>>(&mut self, byte: u8, class: &mut CdcAcmClass<'static, D>) -> bool {
-        if byte == CMD_RESET{
-            self.reset();
-            return false;
-        }
         if self.cmd_idx == 0{
             match byte {
                 CMD_RESET => self.reset(),
@@ -99,7 +95,7 @@ impl SumpParser{
                 let parsed = u32::from_le_bytes([self.cmd_buffer[1], self.cmd_buffer[2], self.cmd_buffer[3], self.cmd_buffer[4]]);
                 match self.cmd_buffer[0]{
                     CMD_SET_DIV => self.config.divider = parsed,
-                    CMD_SET_READ_COUNT => self.config.read_count = (parsed & 0xFFFF) + 1,
+                    CMD_SET_READ_COUNT => self.config.read_count = ((parsed & 0xFFFF) + 1) * 4,
                     CMD_SET_FLAGS => self.config.flags = parsed,
                     _ => {},
                 }

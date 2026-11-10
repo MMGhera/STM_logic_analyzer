@@ -25,3 +25,6 @@ opt-level = "s" # or "z" for smallest binary size
 lto = true
 codegen-units = 1
 debug = true # keeps debug symbols active for probe-rs / defmt
+
+[env]
+DEFMT_LOG = "info"
