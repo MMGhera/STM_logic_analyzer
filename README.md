@@ -6,7 +6,7 @@ A 16-channel logic analyzer for the **STM32H7S3L8**, written in embedded Rust wi
 
 - 16 channels on **PE0–PE15**. Channel N is PEN. Inputs have pull-downs.
 - Up to 16384 samples per capture.
-- Sample rates are set by the SUMP divider: 100 MHz / (div + 1). Up to 20 MHz is currently advertised, not tested yet.
+- Sample rates are set by the SUMP divider: 100 MHz / (div + 1). It has been tested up to 10MHz.
 - USB HS CDC-ACM, so it shows up as `/dev/ttyACMx` and needs no drivers.
 
 ## How it works

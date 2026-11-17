@@ -11,7 +11,8 @@ pub fn init_gpioe(){
     pac::RCC.ahb4enr().modify(|w| w.set_gpioeen(true));
     pac::GPIOE.moder().write(|w| w.0 = 0x0000_0000);
     pac::GPIOE.ospeedr().write(|w| w.0 = 0xFFFF_FFFF);
-    pac::GPIOE.pupdr().write(|w| w.0 = 0xAAAA_AAAA);
+    // pac::GPIOE.pupdr().write(|w| w.0 = 0xAAAA_AAAA);
+    pac::GPIOE.pupdr().write(|w| w.0 = 0xA000_AA80);
 }
 
 pub fn get_gpioe_idr_address() -> *const u16{
